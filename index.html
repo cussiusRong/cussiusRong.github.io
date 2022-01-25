@@ -28,20 +28,39 @@
 </head>
 <body>
     <div id="container">
-        <label for="hai">配置:</label>
-        <input type="uname" id="userName" placeholder="输入名字">
+        <label for="hai">猜缘分:</label>
+        <input type="uname" id="userName" placeholder="输入喜欢的女性动漫名字吧">
         <p id="info"></p>
     </div>
     <script>
         var userName = document.getElementById('userName');
         var info = document.getElementById('info');
+        var arr = [{name: '明日香'},{name: '远坂凛'}];
+        userName.onkeyup = function(e) {
+            if(e.keyCode === 13) {
+                this.blur();
+            }
+        };
         userName.onblur = function() {
             var uname = this.value;
             if(uname.trim().length == 0) {
                 info.innerHTML = '请输入';
-                info.className = 'info-error'
-                return;
+                info.className = 'info-error';
+            }else {
+                var flag = arr.some(function(value) {
+                    return userName.value == value.name;
+                })
+                if(flag) {
+                    info.innerHTML = '是我老婆捏';
+                    info.className = 'info-success';
+                }else {
+                    info.innerHTML = '这是歌姬吧';
+                    info.className = 'info-error';
+                }
             }
+            
+            
+            /*
             //向服务器端发送请求
             ajax({
                 type: 'get',
@@ -56,7 +75,7 @@
                     info.innerHTML = result.message;
                     info.className = 'info-error';
                 }
-            })
+            })*/
         }
            
     </script>
