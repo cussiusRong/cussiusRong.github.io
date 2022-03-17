@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+}
+
+#snakeBoard {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.scoreBoard {
+    width: 421px;
+    height: 60px;
+    top: -70px;
+    background: #FFEE99;
+    position: absolute;
+}
+
+.scoreBoard span {
+    font-size: 20px;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+}
+
+.snakeBackground .snakeSpan {
+    display:  inline-block;
+    background: #eee;
+    border: 1px solid #2b4b6b;
+    width: 40px;
+    height: 40px;
+}
+
+.cover {
+    background:	#A42D00 !important;
+}
+
+.food {
+    background: #FFAA33 !important;
+}
+
+.endBoard {
+    width: 500px;
+    height: 500px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #eee;
+    opacity: 0.8;
+}
+
+.endBoard span {
+    font-size: 100px;
+    font-family: FangSong;
+    color: red;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.endBoard div {
+    width: 100px;
+    height: 100px;
+    background: #2b4b6b;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%);
+    border: 1px solid;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.endBoard p {
+    font-size: 36px;
+    font-family: FangSong;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.foward {
+    width: 150px;
+    height: 150px;
+    background: #2b4b6b;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.up {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    background: #fff;
+    border: 1px solid;
+    border-radius: 50%;
+}
+
+.up span {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.down {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 50%;
+    bottom: 0%;
+    transform: translate(-50%);
+    background: #fff;
+    border: 1px solid;
+    border-radius: 50%;
+}
+
+.down span {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.left {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 0%;
+    top: 30%;
+    background: #fff;
+    border: 1px solid;
+    border-radius: 50%;
+}
+
+.left span {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.right {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 30%;
+    right: 0%;
+    background: #fff;
+    border: 1px solid;
+    border-radius: 50%;
+}
+
+.right span {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+    </style>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="snakeBoard">
+        <div class="scoreBoard">
+            <span>当前得分:{{total}}</span>
+        </div>
+        <div class="snakeBackground" v-for=" i in size ">
+            <span class="snakeSpan" v-for=" j in size " ref="span"></span>
+        </div>
+        <div class="foward">
+            <div class="up" @click="upFoward">
+                <span>^</span>
+            </div>
+            <div class="down" @click="downFoward">
+                <span>v</span>
+            </div>
+            <div class="left" @click="leftFoward">
+                <span><</span>
+            </div>
+            <div class="right" @click="rightFoward">
+                <span>></span>
+            </div>
+        </div>
+        <div v-show="isShow" class="endBoard">
+            
+            <span>{{state}}</span>
+            <div @click="restart">
+                <p>重开?</p>
+            </div>
+        </div>
+        <button @click="startGame">Start Game</button>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#snakeBoard',
+        data: {
+            size: 10,
+            snake: [],
+            length: 4,
+            direction: 'up',
+            food: {},
+            total: 0,
+            isShow: false,
+            state: ""
+        },
+        mounted: function() {
+            let half = Math.floor(this.size / 2)
+            for (let i = 0; i < this.length; i ++) {
+                this.snake.push({x: half, y: half + i < this.size - 1 ? half + i : this.size - 1})
+            }
+            this.render()
+            this.generateFood()
+        },
+        methods: {
+            // init body
+            render: function() {
+                for (let body of this.snake) {
+                   this.$refs.span[body.x + body.y * this.size].classList.add('cover') 
+                }
+            },
+            
+            startGame: function() {
+                this.start()
+            },
+
+            // change direction
+            upFoward: function() {
+                if (this.direction !== 'down') {
+                    this.direction = 'up'
+                }
+            },
+            downFoward: function() {
+                if (this.direction !== 'up') {
+                    this.direction = 'down'
+                }
+            },
+            leftFoward: function() {
+                if (this.direction !== 'right') {
+                    this.direction = 'left'
+                }
+            },
+            rightFoward: function() {
+                if (this.direction !== 'left') {
+                    this.direction = 'right'
+                }
+            },
+
+            // gaming
+            start: function() {
+                let interval = setInterval(() => {
+                    let nextHead = {};
+                    switch (this.direction) {
+                        case 'up': {
+                            nextHead = { x: this.snake[0].x, y: this.snake[0].y - 1 < 0 ?  this.size - 1 : this.snake[0].y - 1  }
+                        } break;
+                        case 'down': {
+                            nextHead = { x: this.snake[0].x, y: this.snake[0].y < this.size - 1 ? this.snake[0].y + 1 : 0 }
+                        } break;
+                        case 'left': {
+                            nextHead = { x: this.snake[0].x - 1 < 0 ?  this.size - 1 : this.snake[0].x - 1 , y: this.snake[0].y}
+                        } break;
+                        case 'right': {
+                            nextHead = { x: this.snake[0].x < this.size - 1 ? this.snake[0].x + 1 : 0, y: this.snake[0].y}
+                        } break;
+                    }
+                    this.snake.splice(0, 0, nextHead)
+                    // 判定是否吃到食物
+                    if (nextHead.x === this.food.x && nextHead.y === this.food.y) {
+                        this.$refs.span[this.food.x + this.food.y * this.size].classList.remove('food')
+                        this.generateFood();
+                    } else {
+                        let tail = this.snake.pop()
+                        this.$refs.span[tail.x + tail.y * this.size].classList.remove('cover')      
+                    }
+                    // 判定碰撞
+                    for (let i = 1; i < this.snake.length; i ++ ) {
+                        if (nextHead.x === this.snake[i].x && nextHead.y === this.snake[i].y) {
+                            clearInterval(interval)
+                            this.isShow = true;
+                            this.state = this.statement
+                            return 
+                        }
+                    }
+                    this.total = this.totalLength
+                    this.render()
+                }, 200)
+            },
+
+            // 重开
+            restart: function() {
+                location.reload()
+            },
+
+            generateFood: function() {
+                this.food = { x: Math.floor(Math.random() * this.size), y: Math.floor(Math.random() * this.size) }
+                this.$refs.span[this.food.x + this.food.y * this.size].classList.add('food')
+            }
+        },
+        computed: {
+            totalLength() {
+                return this.snake.length - 4
+            },
+            statement() {
+                if (this.total <= 30 && this.total >= 0) {
+                    return "菜"
+                } else if (this.total > 30 && this.total <= 60) {
+                    return "一般"
+                }else if (this.total > 60 && this.total <= 100) {
+                    return "牛"
+                }
+            }
+        }
+    })
+</script>
+</html>
